@@ -1,0 +1,67 @@
+<main class="post-container">
+{{#if browse}}
+    {{#each accounts}}
+        {{> accountPost}}
+    {{/each}}
+    
+{{else}}
+    {{#each accounts}}
+        {{#unless library}}
+            {{>accountPost}}
+        {{/unless}}
+    {{/each}}
+
+
+  <div class="post" id="AddPost">
+  <div class="post-contents">
+    <div class="intro-post-image-container">
+      <a href="/myAccounts/newAccount" class="intro-post-title"><img src="https://cdn-icons-png.freepik.com/512/2815/2815428.png"></a>
+    </div>
+    <div class="intro-post-info-container">
+      <a href="/browse" class="intro-post-title"><button type="button" id="modal-accept" class="action-button">View your Account</button></a>
+    </div>
+  </div>
+  </div>
+
+<div id="modal-backdrop" class="hidden"></div>
+    <div id="add-account-modal" class="hidden">
+      <div class="add-dialog" class ="hidden">
+
+        <div class="modal-header">
+          <h3>Add a New Account!</h3>
+        </div>
+
+        <div class="modal-body">
+
+          <div class="post-input-element">
+            <label for="post-name-input">Name of Account</label>
+            <input type="text" id="post-name-input"></input>
+          </div>
+
+          <div class="post-input-element">
+            <label for="post-ingredients-input">List of Ingredients (Seperated by Commas)</label>
+            <input type="text" id="post-ingredients-input">
+          </div>
+
+          <div class="post-input-element">
+            <label for="post-link-input">Link to Account Website</label>
+            <input type="text" id="post-link-input">
+          </div>
+
+          <div class="post-input-element">
+            <label for="post-photo-input">Link to Cover Image</label>
+            <input type="text" id="post-photo-input">
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="hideAddAccount" class="modal-hide-button action-button">Cancel</button>
+          <button type="button" id="acceptAccount" class="action-button">Add Account</button>
+        </div>
+
+      </div>
+    </div>
+    
+{{/if}}
+</main>
