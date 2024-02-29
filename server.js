@@ -108,6 +108,8 @@ app.post('/myAccounts/addAccount', function(req, res, next){
 
 })
 
+
+
 //404 Page (404)
 app.get('*', function(req, res, next)
 {
