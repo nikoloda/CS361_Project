@@ -74,7 +74,7 @@ app.get('/browse', function (req, res)
 
 //Write to accounts.json
 app.post('/myAccounts/addAccount', function(req, res, next){
-  if (req.body && req.body.name && req.body.ingredients && req.body.link && req.body.photoURL) {
+  if (req.body && req.body.name && req.body.ingredients && req.body.link && req.body.photoURL && (req.body.photoURL == req.body.link)) {
     console.log("== Client sent the following account:");
     console.log("  - name:", req.body.name);
     console.log("  - ingredients:", req.body.ingredients);
@@ -82,6 +82,7 @@ app.post('/myAccounts/addAccount', function(req, res, next){
     console.log("  - photoURL:", req.body.photoURL);
     console.log("  - library:", "False");
 
+    
     //add account here
     accountData.push({
       name: req.body.name,
