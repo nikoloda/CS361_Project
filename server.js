@@ -11,6 +11,7 @@ var app = express()
 
 
 
+
 app.engine('handlebars', exphbs.engine({ defaultLayout: 'main' }))
 app.set('view engine', 'handlebars')
 
@@ -21,6 +22,8 @@ app.use(express.json())
 
 
 var loggedIn = 0
+
+var loggedAccount
 
 //Root Page (Handlebar: indexPage)
 app.get('', function (req, res)
@@ -63,13 +66,38 @@ app.get('/myAccounts/newAccount', function (req, res)
 })
 
 //Browse Page (Handlebar: browse)
-app.get('/browse', function (req, res)
-{
-  res.status(200).render('browse', {
-    browse: true,
-    accounts:accountData
-  })
-})
+app.get('/browse', function (req, res) {
+  if (loggedIn === 1) {
+
+    const filePath = path.join(__dirname, '..', 'CodingWebsite-main', 'PostNumData.json');
+    const postNumData = require(filePath);
+    
+    console.log(postNumData);
+
+    var searchField = "library";
+    var searchVal = loggedAccount;
+    var outPutField = "postNum";
+    var results = null; // Initialize results variable
+
+    console.log("searchVal", searchVal)
+
+    for (var i = 0; i < postNumData.length; i++) {
+      console.log("postNumData[i][searchField] == ")
+      if (postNumData[i][searchField] === searchVal) {
+        results = postNumData[i][outPutField];
+        break; // Exit loop once found
+      }
+    }
+    res.status(200).render('browse', {
+      browse: true,
+      accounts: accountData,
+      postNum: results, // Use the found value
+      user: searchVal // Correct variable name
+    });
+  } else {
+    res.status(200).render('indexPage');
+  }
+});
 
 
 
@@ -88,6 +116,46 @@ function writeAccountDataToFile(accountData, res) {
       }
     }
   );
+}
+
+function updateLibraryForUser(userName) {
+  fs.readFile('./accounts.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error reading file:', err);
+      return;
+    }
+
+    let accountData;
+    try {
+      accountData = JSON.parse(data);
+    } catch (parseErr) {
+      console.error('Error parsing JSON:', parseErr);
+      return;
+    }
+
+    // Find the user's account
+    const userAccount = accountData.find(account => account.name === userName);
+
+    if (userAccount) {
+      // Update the library property for the user's account
+      userAccount.library = userName;
+
+      // Write updated account data back to file
+      fs.writeFile(
+        "./accounts.json",
+        JSON.stringify(accountData, null, 2),
+        function (err) {
+          if (err) {
+            console.error('Error writing account data to accounts.json:', err);
+          } else {
+            console.log('Library updated for user:', userName);
+          }
+        }
+      );
+    } else {
+      console.log('User account not found:', userName);
+    }
+  });
 }
 
 function appendLoginInfoToFile(userName) {
@@ -137,9 +205,10 @@ app.post('/myAccounts/addAccount', function(req, res, next) {
 
     const accountExists = accountData.find(account => 
       account.name === req.body.name && 
-      account.ingredients === req.body.ingredients && 
+      account.ingredients.every(ingredient => req.body.ingredients.includes(ingredient)) && 
       account.link === req.body.link && 
-      account.photoURL === req.body.photoURL
+      account.photoURL === req.body.photoURL &&
+      account.library === req.body.library
     );
 
     console.log("Request Body:", req.body);
@@ -149,22 +218,25 @@ app.post('/myAccounts/addAccount', function(req, res, next) {
       console.log("Product already exists");
       loggedAccount = req.body.name;
       loggedIn = 1;
+      updateLibraryForUser(req.body.name)
+
+
     } else {
       console.log("Product not found");
-      // Add account here
       accountData.push({
         name: req.body.name,
         ingredients: req.body.ingredients,
         link: req.body.link,
         photoURL: req.body.photoURL,
-        library: req.body.name // Reset library key
+        library: req.body.name 
       });
-      // Write accountData to file
+
       writeAccountDataToFile(accountData, res);
     }
-
+    
     appendLoginInfoToFile(req.body.name);
 
+    res.render('browse')
   } else {
     res.status(400).send("Requests to this path must contain a JSON body with all fields filled.");
   }
@@ -174,6 +246,8 @@ app.post('/myAccounts/addAccount', function(req, res, next) {
 app.get('/logout', function (req, res) {
   if (loggedIn == 1) {
     loggedIn = 0;
+    loggedAccount = "";
+
     // Reset the library key to an empty string for each entry
     accountData.forEach(account => {
       account.library = "";
@@ -181,6 +255,7 @@ app.get('/logout', function (req, res) {
     // Write accountData to file
     writeAccountDataToFile(accountData, res);
   }
+  res.render('indexPage')
 });
 
 
