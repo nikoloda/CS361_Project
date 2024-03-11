@@ -20,7 +20,7 @@ app.use(express.static('static'))
 app.use(express.json())
 
 
-
+var loggedIn = 0
 
 //Root Page (Handlebar: indexPage)
 app.get('', function (req, res)
@@ -41,7 +41,7 @@ app.get('/myAccounts', function (req, res)
     // Display the file content
     console.log(data);
 
-    if (data == "[]"){
+    if (loggedIn == 0){
       res.status(200).render('addAccount', {
         browse: true,
         accounts:accountData
@@ -57,6 +57,7 @@ app.get('/myAccounts', function (req, res)
 
 //Add on myaccounts
 app.get('/myAccounts/newAccount', function (req, res)
+
 {
   res.status(200).render('addAccount')
 })
@@ -82,7 +83,8 @@ app.post('/myAccounts/addAccount', function(req, res, next){
     console.log("  - photoURL:", req.body.photoURL);
     console.log("  - library:", "False");
 
-    
+    loggedIn = 1
+
     //add account here
     accountData.push({
       name: req.body.name,
@@ -110,6 +112,12 @@ app.post('/myAccounts/addAccount', function(req, res, next){
 })
 
 
+app.get('/logout', function (req, res)
+{
+  if(loggedIn == 1){
+    loggedIn = 0
+  }
+})
 
 //404 Page (404)
 app.get('*', function(req, res, next)
