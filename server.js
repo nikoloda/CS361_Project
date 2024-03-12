@@ -23,7 +23,7 @@ app.use(express.json())
 
 var loggedIn = 0
 
-var loggedAccount
+var loggedAccount = ""
 
 //Root Page (Handlebar: indexPage)
 app.get('', function (req, res)
@@ -70,13 +70,29 @@ app.get('/browse', function (req, res) {
   if (loggedIn === 1) {
 
     const filePath = path.join(__dirname, '..', 'CodingWebsite-main', 'PostNumData.json');
-    const postNumData = require(filePath);
+    fs.readFile(filePath, 'utf8', function (err, data) {
+      if (err) {
+        console.error('Error reading file:', err);
+        res.status(500).send("Error reading data.");
+        return;
+      }
+
+      let postNumData;
+      try {
+        postNumData = JSON.parse(data);
+      } catch (parseErr) {
+        console.error('Error parsing JSON:', parseErr);
+        res.status(500).send("Error parsing data.");
+        return;
+      }
+
+      console.log(postNumData);
     
     console.log(postNumData);
 
-    var searchField = "library";
+    var searchField = "name";
     var searchVal = loggedAccount;
-    var outPutField = "postNum";
+    var outPutField = "count";
     var results = null; // Initialize results variable
 
     console.log("searchVal", searchVal)
@@ -94,6 +110,7 @@ app.get('/browse', function (req, res) {
       postNum: results, // Use the found value
       user: searchVal // Correct variable name
     });
+  });
   } else {
     res.status(200).render('indexPage');
   }
