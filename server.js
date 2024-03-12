@@ -110,7 +110,7 @@ app.get('/browse', function (req, res) {
       postNum: results, // Use the found value
       user: searchVal // Correct variable name
     });
-  });
+    });
   } else {
     res.status(200).render('indexPage');
   }
@@ -247,6 +247,8 @@ app.post('/myAccounts/addAccount', function(req, res, next) {
         photoURL: req.body.photoURL,
         library: req.body.name 
       });
+
+      loggedAccount = req.body.name;
 
       writeAccountDataToFile(accountData, res);
     }
